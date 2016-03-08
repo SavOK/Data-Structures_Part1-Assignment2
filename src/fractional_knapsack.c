@@ -16,7 +16,20 @@ void print_items ( const struct Item * items, size_t size ){
 
 int compareItems (const void * a, const void * b);
 
-double get_optimal_value(long capacity, const struct Item *items,  size_t n); 
+
+/*!
+ * \brief Calcultes the maximum value of items that can be fit in knapsack 
+ *
+ * Given a set of items and total capacity of a knapsack, find the maximal value of fractions of items that fit into the knapsack.
+ *
+ * \param[in] capacity total capacity of knapsack (long)
+ * \param[in] items __Sorted__ array of items (Item*) 
+ * \param[in] N numer of items in array (size_t) 
+ *
+ * \return Maximum value of fraction of items that fit into the knapsack (double)</br> 
+ * __IMPORTANT__ Array of Items should be sorted in increasing order based on the unit value. The most expancive items are in the end of array
+ * */
+double get_optimal_value(long capacity, const struct Item *items,  size_t N); 
 
 int main() {
 
@@ -25,6 +38,10 @@ int main() {
     int K = scanf("%ld %ld", &N, &capacity);
 
     struct Item *items = (struct Item*) malloc(sizeof(struct Item) * N);
+    if( !items) {
+        fprintf(stderr, "CANNOT ALLOCATE MEMORY\n");
+        exit(EXIT_FAILURE);
+    }
 
     i = 0;
     while ( i <  N) {
@@ -46,10 +63,10 @@ int main() {
 int compareItems (const void * a, const void * b) {
     const struct Item *A = a;
     const struct Item *B = b;
-    if ( A->unit_weight <  B->unit_weight ) return -1;
+    if ( A->unit_weight < B->unit_weight ) return -1;
     if ( A->unit_weight > B->unit_weight ) return 1;
     if ( A->unit_weight == B->unit_weight ) {
-        if ( A -> weight > B->weight ) return 1; //prefer heaver items
+        if ( A -> weight > B->weight ) return 1; //prefer lighter items
         if ( A -> weight < B->weight ) return -1;  
         return 0;
     }
@@ -60,10 +77,10 @@ double get_optimal_value(long capacity, const struct Item *items,  size_t n) {
     long rest = capacity;
     const struct Item *curr_item;
     for ( long i = n; i != 0 && rest > 0; i--) {
-        curr_item = items + (i - 1);
+        curr_item = items + (i - 1); //very little of pointer magic
         if ( curr_item->weight > rest ) {
             total_value += (double) rest * curr_item->unit_weight;
-            break;
+            return total_value;
         } 
         rest -= curr_item->weight;
         total_value += curr_item->value;
